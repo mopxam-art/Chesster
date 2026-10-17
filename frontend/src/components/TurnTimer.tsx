@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Timer } from "lucide-react";
 import { soundService } from "../services/soundService";
+import { formatTime } from "../utils/timeControl";
 
 interface GameTimerProps {
 	secondsLeft: number;
@@ -10,13 +11,6 @@ interface GameTimerProps {
 
 /** Clock is considered "low" once it drops to this many seconds or fewer. */
 const LOW_TIME_THRESHOLD = 10;
-
-function formatTime(s: number): string {
-	const clamped = Math.max(0, s);
-	const m = Math.floor(clamped / 60);
-	const sec = Math.max(0, Math.ceil(clamped % 60));
-	return `${m}:${sec.toString().padStart(2, "0")}`;
-}
 
 export default function GameTimer({ secondsLeft, totalSeconds, isCurrentTurn = false }: GameTimerProps) {
 	const pct = totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0;
@@ -28,7 +22,9 @@ export default function GameTimer({ secondsLeft, totalSeconds, isCurrentTurn = f
 	const isCritical = isCurrentTurn && secondsLeft <= 10 && secondsLeft > 0;
 	
 	const lowTime = secondsLeft <= LOW_TIME_THRESHOLD;
-	const display = formatTime(secondsLeft);
+	const totalMs = Math.max(0, Math.round(secondsLeft * 1000));
+	const display = formatTime(totalMs);
+	const isSubTen = totalMs < 10000;
 
 	// Play a warning tick once when the clock crosses into the low-time zone.
 	const wasLowRef = useRef(false);
@@ -55,9 +51,11 @@ export default function GameTimer({ secondsLeft, totalSeconds, isCurrentTurn = f
 					: ""
 			} ${isCritical ? "turn-timer-critical" : ""}`}
 		>
-			<Timer size={12} className={urgent ? "text-red-500" : "text-(--text-tertiary)"} />
+			<Timer size={12} className={urgent || isSubTen ? "text-red-500" : "text-(--text-tertiary)"} />
 			<span
-				className={`font-mono font-bold text-sm tabular-nums ${urgent ? "text-red-400 animate-pulse" : "text-(--text-secondary)"}`}
+				className={`font-mono font-bold text-sm tabular-nums ${
+					urgent || isSubTen ? "text-red-400 animate-pulse" : "text-(--text-secondary)"
+				}`}
 			>
 				{display}
 			</span>
