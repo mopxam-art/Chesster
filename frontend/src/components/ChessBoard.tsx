@@ -71,7 +71,7 @@ import TurnTimer from "./TurnTimer";
 import ChatPanel from "./ChatPanel";
 import MoveInputBar from "./MoveInputBar";
 
-const PIECE_SYMBOLS: Record<string, string> = {
+const _PIECE_SYMBOLS: Record<string, string> = {
   K: "♔",
   Q: "♕",
   R: "♖",
@@ -87,21 +87,9 @@ const PIECE_SYMBOLS: Record<string, string> = {
 };
 
 // Piece set configurations for different visual styles
-const PIECE_SET_SYMBOLS: Record<"classic" | "neo" | "wood", Record<string, string>> = {
-  classic: {
-    K: "♔",
-    Q: "♕",
-    R: "♖",
-    B: "♗",
-    N: "♘",
-    P: "♙",
-    k: "♚",
-    q: "♛",
-    r: "♜",
-    b: "♝",
-    n: "♞",
-    p: "♟",
-  },
+const PIECE_SET_SYMBOLS: Record<string, Record<string, string>> = {
+  standard: _PIECE_SYMBOLS,
+  classic: _PIECE_SYMBOLS,
   neo: {
     K: "♔",
     Q: "♕",
@@ -130,6 +118,7 @@ const PIECE_SET_SYMBOLS: Record<"classic" | "neo" | "wood", Record<string, strin
     n: "♞",
     p: "♟",
   },
+  pixel: _PIECE_SYMBOLS,
 };
 
 const WHITE_PIECE_STYLE: React.CSSProperties = {
@@ -325,9 +314,9 @@ function PlayerAvatar({ color }: { color: "white" | "black" }) {
   );
 }
 
-function CapturedIcons({ captured, pieceSet }: { captured: string[]; pieceSet: "classic" | "neo" | "wood" }) {
+function CapturedIcons({ captured, pieceSet }: { captured: string[]; pieceSet: string }) {
   if (captured.length === 0) return null;
-  const symbols = PIECE_SET_SYMBOLS[pieceSet];
+  const symbols = PIECE_SET_SYMBOLS[pieceSet] ?? PIECE_SET_SYMBOLS.standard;
   return (
     <div className="flex overflow-hidden shrink-0" style={{ maxWidth: "6rem" }}>
       {captured.map((p, i) => (
@@ -382,7 +371,6 @@ function ChessBoardInner() {
     loadMoveHistory,
     isBlindfoldMode,
     isStreamerMode,
-    pieceSet,
   } = useGameStore();
   const { addToast, removeToast } = useToastStore();
   const navigate = useNavigate();
@@ -2173,7 +2161,7 @@ function ChessBoardInner() {
                                   } as React.CSSProperties
                                 }
                               >
-                                {PIECE_SET_SYMBOLS[pieceSet][piece]}
+                                {(PIECE_SET_SYMBOLS[pieceSet] ?? PIECE_SET_SYMBOLS.standard)[piece]}
                               </span>
                             )}
                           </>
@@ -2274,7 +2262,7 @@ function ChessBoardInner() {
                   } as React.CSSProperties
                 }
               >
-                {PIECE_SET_SYMBOLS[pieceSet][dragPiece.piece]}
+                {(PIECE_SET_SYMBOLS[pieceSet] ?? PIECE_SET_SYMBOLS.standard)[dragPiece.piece]}
               </span>
             )}
 
